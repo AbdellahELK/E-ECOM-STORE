@@ -1,7 +1,4 @@
 import mongoose from "mongoose";
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 export const connectToDb = async () => {
     try {
@@ -12,7 +9,7 @@ export const connectToDb = async () => {
         console.log(`MongoDB Connected: ${conn.connection.host}`);
     } catch (error) {
         console.error("\n--- MongoDB Connection Failed ---");
-        
+
         // Handle AggregateError specifically
         if (error.name === 'AggregateError') {
             console.error('Root Cause:', error.cause || 'No cause provided');
@@ -24,14 +21,8 @@ export const connectToDb = async () => {
         // Additional diagnostics
         console.log('\nDiagnostic Checks:');
         console.log('- URI Format:', process.env.MONGO_URI ? 'Exists' : 'Missing');
-        console.log('- Connection Timeout:', error._message?.includes('timeout') ? 'Yes' : 'No');
-        
+        console.log('- Connection Timeout:', error.message?.includes('timeout') ? 'Yes' : 'No');
+
         process.exit(1);
     }
 };
-
-
-// alimaaloulabde16
-
-
-// T65UfbcBlysQCuhu

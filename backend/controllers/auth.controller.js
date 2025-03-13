@@ -1,17 +1,19 @@
-import { redis } from "../lib/redis.js";
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import { redis } from "../lib/redis.js";
+import {compare} from "bcryptjs";
 
 const generateTokens = (userId) => {
-    const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
+    const accessToken = jwt.sign({userId}, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "15m",
     });
-
-    const refreshToken = jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, {
+    const refreshToken = jwt.sign({userId}, process.env.REFRESH_TOKEN_SECRET, {
         expiresIn: "7d",
     });
-
-    return { accessToken, refreshToken };
+    return {
+        accessToken,
+        refreshToken
+    }
 };
 
 const storeRefreshToken = async (userId, refreshToken) => {
@@ -32,6 +34,7 @@ const setCookies = (res, accessToken, refreshToken) => {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 };
+
 
 export const signup = async (req, res) => {
     const { email, password, name } = req.body;
@@ -61,11 +64,12 @@ export const signup = async (req, res) => {
     }
 };
 
+
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-
+        console.log("user here");
         if (user && (await user.comparePassword(password))) {
             const { accessToken, refreshToken } = generateTokens(user._id);
             await storeRefreshToken(user._id, refreshToken);
@@ -135,10 +139,10 @@ export const refreshToken = async (req, res) => {
     }
 };
 
-export const getProfile = async (req, res) => {
-    try {
-        res.json(req.user);
-    } catch (error) {
-        res.status(500).json({ message: "Server error", error: error.message });
-    }
-};
+// export const getProfile = async (req, res) => {
+//     try {
+//         res.json(req.user);
+//     } catch (error) {
+//         res.status(500).json({ message: "Server error", error: error.message });
+//     }
+// };
